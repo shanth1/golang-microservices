@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"lib1"
+)
 
 func main() {
-	fmt.Printf("Hello2")
+	fmt.Println("Hello2")
+	x := lib1.Test()
+	fmt.Println(x)
 }
