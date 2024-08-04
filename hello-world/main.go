@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"lib1"
+
+	"github.com/shanth1/golang-microservices/lib1"
 )
 
 func main() {
