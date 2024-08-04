@@ -3,5 +3,5 @@ package new
 import "fmt"
 
 func Test() {
-	fmt.Println("Sub 2")
+	fmt.Println("Sub 3")
 }
