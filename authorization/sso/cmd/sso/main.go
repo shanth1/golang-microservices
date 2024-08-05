@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/shanth1/golang-microservices/authorization/sso/internal/app"
 	"github.com/shanth1/golang-microservices/authorization/sso/internal/config"
 )
 
@@ -23,6 +24,10 @@ func main() {
 	log.Debug("Debug message")
 	log.Warn("Warn message")
 	log.Error("Error message")
+
+	application := app.New(log, cfg.GRPC.Port, cfg.StoragePath, cfg.TokenTTL)
+
+	application.GRPCSrv.MustRun()
 
 	fmt.Println(cfg)
 }
