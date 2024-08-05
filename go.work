@@ -1,3 +1,6 @@
 go 1.22.4
 
-use ./authorization/protos
+use (
+	./authorization/protos
+	./authorization/sso
+)

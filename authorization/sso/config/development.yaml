@@ -1,0 +1,6 @@
+env: "development"
+storage_path: "./storage/sso.db"
+token_ttl: "1h"
+grpc:
+    prort: 44044
+    timeout: '1h'
