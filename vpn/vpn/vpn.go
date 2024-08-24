@@ -22,4 +22,8 @@ func NewVpn() (*Vpn, error) {
 	return v, nil
 }
 
-func Main() {}
+func (v Vpn) Run() error {
+	for {
+		v.T.Read()
+	}
+}
