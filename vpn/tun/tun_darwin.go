@@ -226,8 +226,8 @@ func (tun *NativeTun) ReadOne() ([]byte, error) {
 		return nil, fmt.Errorf("tun error: %w", err)
 	default:
 		buf := make([]byte, tunMTU)
-		_, err := tun.tunFile.Read(buf[:])
-		return buf, err
+		n, err := tun.tunFile.Read(buf[:])
+		return buf[:n], err
 	}
 }
 

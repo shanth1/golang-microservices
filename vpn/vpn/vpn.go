@@ -34,9 +34,9 @@ func (v *Vpn) Run() error {
 	for {
 		buf, err := v.T.Read()
 		if err != nil {
-			fmt.Printf("err: %v", err)
+			fmt.Printf("err: %v\n", err)
 		} else {
-			fmt.Printf("> %s", hex.EncodeToString(buf))
+			fmt.Printf("> %s\n", hex.EncodeToString(buf))
 		}
 	}
 }
