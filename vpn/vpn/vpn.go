@@ -16,6 +16,8 @@ type Vpn struct {
 
 func NewVpn() (*Vpn, error) {
 	v := new(Vpn)
+	v.C = conn.NewConn()
+	v.T = tun.NewTun()
 
 	return v, nil
 }
