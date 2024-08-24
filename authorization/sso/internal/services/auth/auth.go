@@ -82,13 +82,13 @@ func (a *Auth) RegisterNewUser(
 
 	passHash, err := bcrypt.GenerateFromPassword([]byte(psw), bcrypt.DefaultCost)
 	if err != nil {
-		log.Error("failed to generate password hash", err)
+		log.Error("failed to generate password hash", slog.String("err", err.Error()))
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
 	uid, err := a.usrSaver.SaveUser(ctx, email, passHash)
 	if err != nil {
-		log.Error("failed to save user", err)
+		log.Error("failed to save user", slog.String("err", err.Error()))
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
