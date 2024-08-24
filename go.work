@@ -1,4 +1,8 @@
 go 1.22.4
 
-use ./authorization/protos
-use ./wg-fork-vpn
+use (
+	./authorization/protos
+	./authorization/sso
+	./wg-fork-vpn
+)
+
