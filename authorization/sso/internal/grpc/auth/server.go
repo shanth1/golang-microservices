@@ -42,16 +42,8 @@ const (
 func (s *serverAPI) Login(
 	ctx context.Context, req *ssov1.LoginRequest,
 ) (*ssov1.LoginResponse, error) {
-	if req.GetEmail() == "" {
-		return nil, status.Error(codes.InvalidArgument, "Email is required")
-	}
-
-	if req.GetPassword() == "" {
-		return nil, status.Error(codes.InvalidArgument, "Password is required")
-	}
-
-	if req.AppId == emptyValue {
-		return nil, status.Error(codes.InvalidArgument, "app_id is required")
+	if err := validateLogin(req); err != nil {
+		return nil, err
 	}
 
 	token, err := s.auth.Login(ctx, req.GetEmail(), req.GetPassword(), int(req.AppId))
@@ -70,4 +62,20 @@ func (s *serverAPI) Register(ctx context.Context, req *ssov1.RegisterRequest) (*
 
 func (s *serverAPI) IsAdmin(ctx context.Context, req *ssov1.IsAdminRequest) (*ssov1.IsAdminResponse, error) {
 	panic("Implement me")
+}
+
+func validateLogin(req *ssov1.LoginRequest) error {
+	if req.GetEmail() == "" {
+		return status.Error(codes.InvalidArgument, "Email is required")
+	}
+
+	if req.GetPassword() == "" {
+		return status.Error(codes.InvalidArgument, "Password is required")
+	}
+
+	if req.AppId == emptyValue {
+		return status.Error(codes.InvalidArgument, "app_id is required")
+	}
+
+	return nil
 }
