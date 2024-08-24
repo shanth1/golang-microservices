@@ -2,10 +2,12 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"time"
 
 	"github.com/shanth1/golang-microservices/authorization/sso/internal/domain/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Auth struct {
@@ -69,7 +71,28 @@ func (a *Auth) RegisterNewUser(
 	email string,
 	psw string,
 ) (int64, error) {
-	panic("not implemented")
+	const op = "auth.RegisterNewUser"
+
+	log := a.log.With(
+		slog.String("op", op),
+		slog.String("email", email),
+	)
+
+	log.Info("registering user")
+
+	passHash, err := bcrypt.GenerateFromPassword([]byte(psw), bcrypt.DefaultCost)
+	if err != nil {
+		log.Error("failed to generate password hash", err)
+		return 0, fmt.Errorf("%s: %w", op, err)
+	}
+
+	uid, err := a.usrSaver.SaveUser(ctx, email, passHash)
+	if err != nil {
+		log.Error("failed to save user", err)
+		return 0, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return uid, nil
 }
 
 // IsAdmin checks if user is admin
