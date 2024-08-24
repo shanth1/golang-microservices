@@ -28,6 +28,7 @@ type NativeTun struct {
 	errors      chan error
 	routeSocket int
 	closeOnce   sync.Once
+	mtu         int
 }
 
 func retryInterfaceByIndex(index int) (iface *net.Interface, err error) {
@@ -217,6 +218,19 @@ func (tun *NativeTun) Events() <-chan Event {
 	return tun.events
 }
 
+const tunMTU = 1500
+
+func (tun *NativeTun) ReadOne() ([]byte, error) {
+	select {
+	case err := <-tun.errors:
+		return nil, fmt.Errorf("tun error: %w", err)
+	default:
+		buf := make([]byte, tunMTU)
+		_, err := tun.tunFile.Read(buf[:])
+		return buf, err
+	}
+}
+
 func (tun *NativeTun) Read(bufs [][]byte, sizes []int, offset int) (int, error) {
 	// TODO: the BSDs look very similar in Read() and Write(). They should be
 	// collapsed, with platform-specific files containing the varying parts of
@@ -295,7 +309,7 @@ func (tun *NativeTun) setMTU(n int) error {
 	if err != nil {
 		return fmt.Errorf("failed to set MTU on %s: %w", tun.name, err)
 	}
-
+	tun.mtu = n
 	return nil
 }
 

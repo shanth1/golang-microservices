@@ -12,16 +12,17 @@ type Tun struct {
 	T *NativeTun
 }
 
-func NewTun(name string, MTU int) (*Tun, error) {
+func NewTun(name string, mtu int) (*Tun, error) {
 	t := new(Tun)
 
 	var err error
-	if t.T, err = CreateTUN(name, MTU); err != nil {
+	if t.T, err = CreateTUN(name, mtu); err != nil {
 		return nil, err
 	}
+
 	return t, nil
 }
 
-func (t *Tun) Read() []byte {
-	return nil
+func (t *Tun) Read() ([]byte, error) {
+	return t.T.ReadOne()
 }
