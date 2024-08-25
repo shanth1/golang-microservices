@@ -4,8 +4,8 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/shanth1/golang-microservices/vpn/conn"
-	"github.com/shanth1/golang-microservices/vpn/tun"
+	"github.com/shanth1/golang-microservices/wg-fork-vpn/conn"
+	"github.com/shanth1/golang-microservices/wg-fork-vpn/tun"
 )
 
 type Config struct {
