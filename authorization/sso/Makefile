@@ -5,3 +5,6 @@ run-dev:
 
 run-migrations:
 	go run cmd/migrator/main.go --storage-path="./storage/sso.db" --migrations-path="migrations"
+
+run-test-migrations:
+	go run cmd/migrator/main.go --storage-path="./storage/sso.db" --migrations-path="tests/migrations" --migrations-table="migrations_test"
