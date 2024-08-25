@@ -4,5 +4,5 @@ use (
 	./authorization/protos
 	./authorization/sso
 	./wg-fork-vpn
+	./tcp-server
 )
-
