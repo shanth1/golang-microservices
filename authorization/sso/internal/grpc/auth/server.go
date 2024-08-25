@@ -6,7 +6,6 @@ import (
 
 	ssov1 "github.com/shanth1/golang-microservices/authorization/protos/gen/go/sso"
 	"github.com/shanth1/golang-microservices/authorization/sso/internal/services/auth"
-	"github.com/shanth1/golang-microservices/authorization/sso/internal/storage"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -52,10 +51,10 @@ func (s *serverAPI) Login(
 	token, err := s.auth.Login(ctx, req.GetEmail(), req.GetPassword(), int(req.AppId))
 	if err != nil {
 		if errors.Is(err, auth.ErrInvalidCredentials) {
-			return nil, status.Error(codes.InvalidArgument, "Invalid arugment")
+			return nil, status.Error(codes.InvalidArgument, "invalid email or password")
 		}
 
-		return nil, status.Error(codes.Internal, "Internal error")
+		return nil, status.Error(codes.Internal, "internal error")
 	}
 
 	return &ssov1.LoginResponse{
@@ -73,10 +72,10 @@ func (s *serverAPI) Register(ctx context.Context, req *ssov1.RegisterRequest) (*
 		req.GetPassword(),
 	)
 	if err != nil {
-		if errors.Is(err, storage.ErrUserExists) {
-			return nil, status.Error(codes.Internal, "User already exists")
+		if errors.Is(err, auth.ErrUserExists) {
+			return nil, status.Error(codes.Internal, "user already exists")
 		}
-		return nil, status.Error(codes.Internal, "Internal error")
+		return nil, status.Error(codes.Internal, "internal error")
 	}
 
 	return &ssov1.RegisterResponse{UserId: userId}, nil
@@ -87,15 +86,15 @@ func (s *serverAPI) IsAdmin(
 	req *ssov1.IsAdminRequest,
 ) (*ssov1.IsAdminResponse, error) {
 	if err := validateIsAdmin(req); err != nil {
-		return nil, status.Error(codes.Internal, "Internal error")
+		return nil, status.Error(codes.Internal, "internal error")
 	}
 
 	isAdmin, err := s.auth.IsAdmin(ctx, req.GetUserId())
 	if err != nil {
-		if errors.Is(err, storage.ErrUserNotFound) {
-			return nil, status.Error(codes.NotFound, "User not found")
+		if errors.Is(err, auth.ErrNotFound) {
+			return nil, status.Error(codes.NotFound, "user not found")
 		}
-		return nil, status.Error(codes.Internal, "Internal error")
+		return nil, status.Error(codes.Internal, "internal error")
 	}
 
 	return &ssov1.IsAdminResponse{IsAdmin: isAdmin}, nil
@@ -103,11 +102,11 @@ func (s *serverAPI) IsAdmin(
 
 func validateLogin(req *ssov1.LoginRequest) error {
 	if req.GetEmail() == "" {
-		return status.Error(codes.InvalidArgument, "Email is required")
+		return status.Error(codes.InvalidArgument, "email is required")
 	}
 
 	if req.GetPassword() == "" {
-		return status.Error(codes.InvalidArgument, "Password is required")
+		return status.Error(codes.InvalidArgument, "password is required")
 	}
 
 	if req.AppId == emptyValue {
@@ -119,11 +118,11 @@ func validateLogin(req *ssov1.LoginRequest) error {
 
 func validateRegister(req *ssov1.RegisterRequest) error {
 	if req.GetEmail() == "" {
-		return status.Error(codes.InvalidArgument, "Email is required")
+		return status.Error(codes.InvalidArgument, "email is required")
 	}
 
 	if req.GetPassword() == "" {
-		return status.Error(codes.InvalidArgument, "Password is required")
+		return status.Error(codes.InvalidArgument, "password is required")
 	}
 
 	return nil
