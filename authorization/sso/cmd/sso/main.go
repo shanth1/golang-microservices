@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/shanth1/golang-microservices/authorization/sso/internal/app"
 	"github.com/shanth1/golang-microservices/authorization/sso/internal/config"
@@ -27,9 +29,19 @@ func main() {
 
 	application := app.New(log, cfg.GRPC.Port, cfg.StoragePath, cfg.TokenTTL)
 
-	application.GRPCSrv.MustRun()
+	go application.GRPCSrv.MustRun()
 
 	fmt.Println(cfg)
+
+	// Graceful shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+
+	signal := <-stop
+
+	log.Info("Stopping application", slog.String("signal", signal.String()))
+	application.GRPCSrv.Stop()
+	log.Info("Application stopped")
 }
 
 func setupLogger(env string) *slog.Logger {
