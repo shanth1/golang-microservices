@@ -10,6 +10,7 @@ type Server struct {
 	listenAddr string
 	ln         net.Listener
 	quiteChan  chan struct{}
+	msgChan    chan []byte
 }
 
 func (s *Server) Start() error {
@@ -23,6 +24,8 @@ func (s *Server) Start() error {
 	go s.AcceptLoop()
 
 	<-s.quiteChan
+	close(s.msgChan)
+
 	return nil
 }
 
@@ -49,8 +52,7 @@ func (s *Server) ReadLoop(conn net.Conn) {
 			continue
 		}
 
-		msg := buf[:n]
-		fmt.Println(string(msg))
+		s.msgChan <- buf[:n]
 	}
 
 }
@@ -59,10 +61,18 @@ func NewServer(listenAddr string) *Server {
 	return &Server{
 		listenAddr: listenAddr,
 		quiteChan:  make(chan struct{}),
+		msgChan:    make(chan []byte, 5),
 	}
 }
 
 func main() {
 	server := NewServer(":3000")
+
+	go func() {
+		for msg := range server.msgChan {
+			fmt.Println("received message:", string(msg))
+		}
+	}()
+
 	log.Fatal(server.Start())
 }
