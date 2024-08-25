@@ -58,8 +58,9 @@ func (s *Server) ReadLoop(conn net.Conn) {
 		}
 
 		s.msgChan <- Message{from: conn.RemoteAddr().String(), payload: buf[:n]}
-	}
 
+		conn.Write([]byte("thanks for message (:"))
+	}
 }
 
 func NewServer(listenAddr string) *Server {
