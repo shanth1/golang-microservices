@@ -5,4 +5,5 @@ use (
 	./authorization/sso
 	./wg-fork-vpn
 	./tcp-server
+	./grpc
 )
