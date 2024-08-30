@@ -21,10 +21,8 @@ func NewServer() *Server {
 }
 
 func (s *Server) HandleWS(ws *websocket.Conn) {
-	fmt.Printf("new inconming connection from client: %s", ws.RemoteAddr())
-
+	fmt.Printf("new inconming connection from client: %s\n", ws.RemoteAddr())
 	s.conns[ws] = true
-
 	s.ReadLoop(ws)
 }
 
@@ -41,8 +39,18 @@ func (s *Server) ReadLoop(ws *websocket.Conn) {
 			continue
 		}
 		msg := buf[:n]
-		fmt.Println(string(msg))
-		ws.Write([]byte("thanks for the message!"))
+		s.Broadcast(msg)
+	}
+}
+
+func (s *Server) Broadcast(b []byte) {
+	for w := range s.conns {
+		go func(ws *websocket.Conn) {
+			if _, err := w.Write(b); err != nil {
+				fmt.Println("boarcast err:", err)
+
+			}
+		}(w)
 	}
 }
 
