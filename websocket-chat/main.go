@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	"golang.org/x/net/websocket"
 )
@@ -71,8 +72,23 @@ func (s *Server) broadcast(msg []byte) {
 	}
 }
 
+func (s *Server) startBroadcastTicker() {
+	ticker := time.NewTicker(2 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			message := []byte("Hello from ticker!")
+			s.broadcast(message)
+		}
+	}
+}
+
 func main() {
 	server := NewServer()
+	go server.startBroadcastTicker()
+
 	http.Handle("/ws", websocket.Handler(server.handleWS))
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
