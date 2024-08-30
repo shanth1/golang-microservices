@@ -6,4 +6,5 @@ use (
 	./wg-fork-vpn
 	./tcp-server
 	./grpc
+	./websocket-chat
 )
