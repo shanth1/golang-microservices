@@ -6,12 +6,14 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"sync"
 
 	"golang.org/x/net/websocket"
 )
 
 type Server struct {
 	conns map[*websocket.Conn]bool
+	mu    sync.Mutex
 }
 
 func NewServer() *Server {
@@ -20,10 +22,23 @@ func NewServer() *Server {
 	}
 }
 
-func (s *Server) HandleWS(ws *websocket.Conn) {
-	fmt.Printf("new inconming connection from client: %s\n", ws.RemoteAddr())
+func (s *Server) handleWS(ws *websocket.Conn) {
+	defer ws.Close()
+
+	fmt.Printf("New incoming connection from client: %s\n", ws.RemoteAddr())
+	s.mu.Lock()
 	s.conns[ws] = true
+	s.mu.Unlock()
+
 	s.ReadLoop(ws)
+
+	s.removeConn(ws)
+}
+
+func (s *Server) removeConn(ws *websocket.Conn) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.conns, ws)
 }
 
 func (s *Server) ReadLoop(ws *websocket.Conn) {
@@ -35,27 +50,29 @@ func (s *Server) ReadLoop(ws *websocket.Conn) {
 			if errors.Is(err, io.EOF) {
 				break
 			}
-			fmt.Println("read error:", err)
-			continue
+			log.Println("Read error:", err)
+			return
 		}
 		msg := buf[:n]
-		s.Broadcast(msg)
+		s.broadcast(msg)
 	}
 }
 
-func (s *Server) Broadcast(b []byte) {
-	for w := range s.conns {
-		go func(ws *websocket.Conn) {
-			if _, err := w.Write(b); err != nil {
-				fmt.Println("boarcast err:", err)
+func (s *Server) broadcast(msg []byte) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
+	for ws := range s.conns {
+		go func(conn *websocket.Conn) {
+			if _, err := conn.Write(msg); err != nil {
+				log.Println("Broadcast error:", err)
 			}
-		}(w)
+		}(ws)
 	}
 }
 
 func main() {
-	s := NewServer()
-	http.Handle("/ws", websocket.Handler(s.HandleWS))
+	server := NewServer()
+	http.Handle("/ws", websocket.Handler(server.handleWS))
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
