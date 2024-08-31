@@ -8,4 +8,5 @@ use (
 	./grpc
 	./websocket-chat
 	./tcp-files
+	./url-shortener
 )
