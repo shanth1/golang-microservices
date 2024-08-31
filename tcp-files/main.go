@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/rand"
 	"fmt"
 	"io"
@@ -28,20 +29,18 @@ func (fs *fileServer) start() {
 }
 
 func (fs *fileServer) readLoop(conn net.Conn) {
-	buf := make([]byte, 2048)
+	buf := new(bytes.Buffer)
 	for {
-		n, err := conn.Read(buf)
+		n, err := io.CopyN(buf, conn, 10000)
 		if err != nil {
 			fmt.Println("error on read loop:", err)
 		}
-
-		file := buf[:n]
-		fmt.Println(file)
+		fmt.Println(buf.Bytes())
 		fmt.Printf("received %d bytes\n", n)
 	}
 }
 
-func sendFile(size int) error {
+func sendFile(size int64) error {
 	file := make([]byte, size)
 	if _, err := io.ReadFull(rand.Reader, file); err != nil {
 		return err
@@ -52,7 +51,7 @@ func sendFile(size int) error {
 		return err
 	}
 
-	n, err := conn.Write(file)
+	n, err := io.CopyN(conn, bytes.NewReader(file), size)
 	if err != nil {
 		return err
 	}
@@ -64,7 +63,7 @@ func sendFile(size int) error {
 func main() {
 	go func() {
 		time.Sleep(1 * time.Second)
-		if err := sendFile(1000); err != nil {
+		if err := sendFile(10000); err != nil {
 			fmt.Println("error on sending file:", err)
 		}
 	}()
