@@ -7,4 +7,5 @@ use (
 	./tcp-server
 	./grpc
 	./websocket-chat
+	./tcp-files
 )
