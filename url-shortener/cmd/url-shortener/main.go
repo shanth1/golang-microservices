@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/shanth1/golang-microservices/url-shortener/internal/config"
+	"github.com/shanth1/golang-microservices/url-shortener/internal/storage/sqlite"
 )
 
 const (
@@ -15,16 +16,18 @@ const (
 )
 
 func main() {
-	// TODO: init config
 	cfg := config.MustLoad()
 	fmt.Println(cfg)
 
-	// TODO: init jlogger
 	logger := setupLogger(cfg.Env)
 	logger.Info("starting url shortener", slog.String("env", cfg.Env))
 	logger.Debug("debug messages are enabled")
 
-	// TODO: init storage
+	_, err := sqlite.New(cfg.StoragePath)
+	if err != nil {
+		logger.Error("init storage error")
+		os.Exit(1)
+	}
 
 	// TODO: init router
 
