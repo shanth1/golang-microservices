@@ -24,11 +24,13 @@ func main() {
 	logger.Info("starting url shortener", slog.String("env", cfg.Env))
 	logger.Debug("debug messages are enabled")
 
-	_, err := sqlite.New(cfg.StoragePath)
+	storage, err := sqlite.New(cfg.StoragePath)
 	if err != nil {
 		logger.Error("init storage error", slogger.Error(err))
 		os.Exit(1)
 	}
+
+	_ = storage
 
 	// TODO: init router
 
