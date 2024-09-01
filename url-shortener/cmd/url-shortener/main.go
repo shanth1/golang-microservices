@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/shanth1/golang-microservices/url-shortener/internal/config"
+	"github.com/shanth1/golang-microservices/url-shortener/internal/lib/slogger"
 	"github.com/shanth1/golang-microservices/url-shortener/internal/storage/sqlite"
 )
 
@@ -25,7 +26,7 @@ func main() {
 
 	_, err := sqlite.New(cfg.StoragePath)
 	if err != nil {
-		logger.Error("init storage error")
+		logger.Error("init storage error", slogger.Error(err))
 		os.Exit(1)
 	}
 
